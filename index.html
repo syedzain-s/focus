@@ -5,81 +5,148 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Focus Dashboard - Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .fade-up { animation: fadeUp 0.8s ease-out forwards; }
+        .gradient-animate {
+            background-size: 200% 200%;
+            animation: gradientShift 8s ease infinite;
+        }
+        
+        /* Grid pattern overlay */
+        .grid-pattern {
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        /* Glow effect */
+        .glow-text {
+            text-shadow: 0 0 40px rgba(139, 92, 246, 0.6),
+                         0 0 80px rgba(139, 92, 246, 0.3);
+        }
+    </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
-    <!-- Animated background -->
-    <div class="absolute inset-0 opacity-20">
-        <div class="absolute top-20 left-20 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
-        <div class="absolute bottom-20 right-20 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+<body class="min-h-screen bg-black flex items-center justify-center p-4 overflow-hidden relative">
+    <!-- Grid overlay -->
+    <div class="absolute inset-0 grid-pattern opacity-30"></div>
+
+    <!-- Gradient orb background -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute -top-40 -left-40 w-80 h-80 bg-purple-600 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-pulse"></div>
+        <div class="absolute top-1/3 -right-20 w-96 h-96 bg-blue-600 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-pulse" style="animation-delay: 1.5s;"></div>
+        <div class="absolute -bottom-32 left-1/3 w-80 h-80 bg-pink-600 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-pulse" style="animation-delay: 3s;"></div>
     </div>
 
     <div class="relative z-10 w-full max-w-md">
-        <!-- Logo/Title -->
-        <div class="text-center mb-8">
-            <h1 class="text-6xl font-bold text-white mb-2" style="text-shadow: 0 0 40px rgba(255,255,255,0.3)">Focus</h1>
-            <p class="text-white text-opacity-60">Your Elite Productivity Dashboard</p>
+        <!-- Title Section -->
+        <div class="text-center mb-12 fade-up">
+            <div class="inline-block mb-6">
+                <div class="flex items-center justify-center gap-2 mb-2">
+                    <div class="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                    <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
+                    <div class="w-2 h-2 bg-pink-500 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
+                </div>
+                <h1 class="text-7xl font-black text-white glow-text tracking-tighter">
+                    FOCUS
+                </h1>
+            </div>
+            <p class="text-gray-400 text-sm tracking-widest uppercase">Deep Work. Zero Distractions.</p>
         </div>
 
         <!-- Login Card -->
-        <div class="backdrop-blur-xl bg-white bg-opacity-10 rounded-3xl p-8 border border-white border-opacity-20 shadow-2xl">
-            <h2 class="text-2xl font-bold text-white mb-6 text-center">Welcome Back</h2>
+        <div class="backdrop-blur-xl bg-gradient-to-br from-zinc-900/90 to-black/90 rounded-2xl p-8 border border-zinc-800 shadow-2xl fade-up" style="animation-delay: 0.2s;">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-white mb-1">Sign In</h2>
+                <p class="text-gray-500 text-sm">Continue your productivity journey</p>
+            </div>
             
-            <form id="loginForm" class="space-y-6">
+            <form id="loginForm" class="space-y-5">
                 <!-- Email -->
-                <div>
-                    <label class="block text-white text-opacity-80 text-sm mb-2">Email</label>
+                <div class="group">
+                    <label class="block text-gray-400 text-xs mb-2 uppercase tracking-wider font-semibold">Email</label>
                     <input 
                         type="email" 
                         id="loginEmail"
                         required
-                        placeholder="your@email.com"
-                        class="w-full bg-white bg-opacity-5 border border-white border-opacity-20 rounded-xl px-6 py-4 text-white placeholder-white placeholder-opacity-40 focus:outline-none focus:bg-opacity-10 focus:border-opacity-40 transition-all duration-300"
+                        placeholder="name@example.com"
+                        class="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 focus:bg-zinc-900/80 transition-all duration-300"
                     >
                 </div>
 
                 <!-- Password -->
-                <div>
-                    <label class="block text-white text-opacity-80 text-sm mb-2">Password</label>
+                <div class="group">
+                    <label class="block text-gray-400 text-xs mb-2 uppercase tracking-wider font-semibold">Password</label>
                     <input 
                         type="password" 
                         id="loginPassword"
                         required
                         placeholder="••••••••"
-                        class="w-full bg-white bg-opacity-5 border border-white border-opacity-20 rounded-xl px-6 py-4 text-white placeholder-white placeholder-opacity-40 focus:outline-none focus:bg-opacity-10 focus:border-opacity-40 transition-all duration-300"
+                        class="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 focus:bg-zinc-900/80 transition-all duration-300"
                     >
                 </div>
 
                 <!-- Error Message -->
-                <div id="loginError" class="hidden bg-red-500 bg-opacity-20 border border-red-500 border-opacity-50 rounded-xl px-4 py-3 text-red-200 text-sm"></div>
+                <div id="loginError" class="hidden bg-red-950/50 border border-red-900 rounded-lg px-4 py-3 text-red-400 text-sm font-medium"></div>
 
                 <!-- Login Button -->
                 <button 
                     type="submit"
-                    class="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-4 rounded-xl hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105"
+                    class="w-full bg-gradient-to-r from-purple-600 via-purple-500 to-blue-600 gradient-animate text-white font-semibold py-3.5 rounded-lg hover:shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 hover:-translate-y-0.5 mt-6"
                 >
-                    Sign In
+                    Access Dashboard
                 </button>
             </form>
 
             <!-- Divider -->
-            <div class="flex items-center my-6">
-                <div class="flex-1 h-px bg-white bg-opacity-20"></div>
-                <span class="px-4 text-white text-opacity-40 text-sm">or</span>
-                <div class="flex-1 h-px bg-white bg-opacity-20"></div>
+            <div class="flex items-center my-8">
+                <div class="flex-1 h-px bg-zinc-800"></div>
+                <span class="px-4 text-gray-600 text-xs">OR</span>
+                <div class="flex-1 h-px bg-zinc-800"></div>
             </div>
 
             <!-- Sign Up Link -->
             <div class="text-center">
-                <p class="text-white text-opacity-60 text-sm">
-                    Don't have an account? 
-                    <a href="signup.html" class="text-blue-400 hover:text-blue-300 font-semibold transition-colors">Sign Up</a>
+                <p class="text-gray-500 text-sm">
+                    New here? 
+                    <a href="signup.html" class="text-purple-400 hover:text-purple-300 font-semibold transition-colors ml-1">Create an account</a>
                 </p>
             </div>
         </div>
 
         <!-- Footer -->
-        <div class="text-center mt-6">
-            <p class="text-white text-opacity-40 text-sm">Built with focus. Designed for productivity.</p>
+        <div class="text-center mt-8 fade-up" style="animation-delay: 0.4s;">
+            <div class="flex items-center justify-center gap-4 mb-3">
+                <div class="flex items-center gap-1.5">
+                    <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                    <span class="text-gray-600 text-xs">Secure</span>
+                </div>
+                <div class="w-px h-3 bg-zinc-800"></div>
+                <div class="flex items-center gap-1.5">
+                    <div class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                    <span class="text-gray-600 text-xs">Fast</span>
+                </div>
+                <div class="w-px h-3 bg-zinc-800"></div>
+                <div class="flex items-center gap-1.5">
+                    <div class="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
+                    <span class="text-gray-600 text-xs">Private</span>
+                </div>
+            </div>
+            <p class="text-gray-700 text-xs">© 2025 Focus • Built by syedzain-s</p>
         </div>
     </div>
 
@@ -108,7 +175,7 @@
                 window.location.href = 'dashboard.html';
             } else {
                 // Login failed
-                errorDiv.textContent = 'Invalid email or password';
+                errorDiv.textContent = 'Invalid credentials. Please try again.';
                 errorDiv.classList.remove('hidden');
                 
                 // Hide error after 3 seconds
