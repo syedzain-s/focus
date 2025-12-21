@@ -1,4 +1,4 @@
-html<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -16,6 +16,12 @@ html<!DOCTYPE html>
         const { useState, useEffect } = React;
 
         function FocusDashboard() {
+          // Check if user is logged in
+          const currentUser = JSON.parse(localStorage.getItem('focusUser'));
+          if (!currentUser) {
+              window.location.href = 'index.html';
+          }
+
           const [time, setTime] = useState(new Date());
           const [goals, setGoals] = useState([
             { id: 1, text: '', completed: false },
@@ -84,6 +90,11 @@ html<!DOCTYPE html>
             setGoals(goals.map(g => g.id === id ? { ...g, completed: !g.completed } : g));
           };
 
+          const logout = () => {
+            localStorage.removeItem('focusUser');
+            window.location.href = 'index.html';
+          };
+
           const formatTime = (date) => {
             return date.toLocaleTimeString('en-US', { 
               hour: '2-digit', 
@@ -124,10 +135,21 @@ html<!DOCTYPE html>
                       </svg>
                     )}
                   </button>
-                  
-                  <div className="backdrop-blur-xl bg-white bg-opacity-10 rounded-2xl px-6 py-4 border border-white border-opacity-20">
-                    <p className="text-5xl font-bold text-white">{weather.temp}°</p>
-                    <p className="text-white text-opacity-80 text-sm mt-1">{weather.vibe}</p>
+
+                  <div className="flex items-center gap-4">
+                    <div className="backdrop-blur-xl bg-white bg-opacity-10 rounded-2xl px-6 py-4 border border-white border-opacity-20">
+                      <p className="text-5xl font-bold text-white">{weather.temp}°</p>
+                      <p className="text-white text-opacity-80 text-sm mt-1">{weather.vibe}</p>
+                    </div>
+
+                    <button
+                      onClick={logout}
+                      className="backdrop-blur-xl bg-white bg-opacity-10 rounded-2xl p-4 border border-white border-opacity-20 hover:bg-opacity-20 transition-all duration-300 hover:scale-105"
+                    >
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
 
