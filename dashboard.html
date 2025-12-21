@@ -1,0 +1,213 @@
+html<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Focus Dashboard</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function FocusDashboard() {
+          const [time, setTime] = useState(new Date());
+          const [goals, setGoals] = useState([
+            { id: 1, text: '', completed: false },
+            { id: 2, text: '', completed: false },
+            { id: 3, text: '', completed: false }
+          ]);
+          const [timerMinutes, setTimerMinutes] = useState(25);
+          const [timerSeconds, setTimerSeconds] = useState(0);
+          const [isTimerRunning, setIsTimerRunning] = useState(false);
+          const [isWorkMode, setIsWorkMode] = useState(true);
+          const [isDeepWorkActive, setIsDeepWorkActive] = useState(false);
+          const [weather] = useState({ temp: 72, vibe: 'Clear Skies' });
+
+          useEffect(() => {
+            const interval = setInterval(() => setTime(new Date()), 1000);
+            return () => clearInterval(interval);
+          }, []);
+
+          useEffect(() => {
+            let interval;
+            if (isTimerRunning) {
+              interval = setInterval(() => {
+                if (timerSeconds === 0) {
+                  if (timerMinutes === 0) {
+                    setIsTimerRunning(false);
+                    setIsDeepWorkActive(false);
+                    setIsWorkMode(!isWorkMode);
+                    setTimerMinutes(isWorkMode ? 5 : 25);
+                  } else {
+                    setTimerMinutes(timerMinutes - 1);
+                    setTimerSeconds(59);
+                  }
+                } else {
+                  setTimerSeconds(timerSeconds - 1);
+                }
+              }, 1000);
+            }
+            return () => clearInterval(interval);
+          }, [isTimerRunning, timerMinutes, timerSeconds, isWorkMode]);
+
+          const toggleTimer = () => {
+            setIsTimerRunning(!isTimerRunning);
+            if (!isTimerRunning) setIsDeepWorkActive(true);
+          };
+
+          const resetTimer = () => {
+            setIsTimerRunning(false);
+            setIsDeepWorkActive(false);
+            setTimerMinutes(isWorkMode ? 25 : 5);
+            setTimerSeconds(0);
+          };
+
+          const toggleMode = () => {
+            setIsWorkMode(!isWorkMode);
+            setIsTimerRunning(false);
+            setIsDeepWorkActive(false);
+            setTimerMinutes(!isWorkMode ? 25 : 5);
+            setTimerSeconds(0);
+          };
+
+          const updateGoal = (id, text) => {
+            setGoals(goals.map(g => g.id === id ? { ...g, text } : g));
+          };
+
+          const toggleGoal = (id) => {
+            setGoals(goals.map(g => g.id === id ? { ...g, completed: !g.completed } : g));
+          };
+
+          const formatTime = (date) => {
+            return date.toLocaleTimeString('en-US', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: true 
+            });
+          };
+
+          const bgGradient = isWorkMode 
+            ? 'from-slate-900 via-blue-900 to-slate-900' 
+            : 'from-orange-900 via-pink-900 to-purple-900';
+
+          return (
+            <div className={`min-h-screen bg-gradient-to-br ${bgGradient} transition-all duration-1000 relative overflow-hidden`}>
+              <div className="absolute inset-0 opacity-20">
+                <div className="absolute top-20 left-20 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+                <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+              </div>
+
+              {isDeepWorkActive && (
+                <div className="absolute inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-10 transition-all duration-500"></div>
+              )}
+
+              <div className="relative z-20 min-h-screen p-8">
+                <div className="flex justify-between items-start mb-12">
+                  <button
+                    onClick={toggleMode}
+                    className="backdrop-blur-xl bg-white bg-opacity-10 rounded-2xl p-4 border border-white border-opacity-20 hover:bg-opacity-20 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/50"
+                  >
+                    {isWorkMode ? (
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                      </svg>
+                    ) : (
+                      <svg className="w-6 h-6 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                    )}
+                  </button>
+                  
+                  <div className="backdrop-blur-xl bg-white bg-opacity-10 rounded-2xl px-6 py-4 border border-white border-opacity-20">
+                    <p className="text-5xl font-bold text-white">{weather.temp}°</p>
+                    <p className="text-white text-opacity-80 text-sm mt-1">{weather.vibe}</p>
+                  </div>
+                </div>
+
+                <div className={`text-center mb-16 transition-all duration-500 ${isDeepWorkActive ? 'opacity-30' : 'opacity-100'}`}>
+                  <h1 className="text-9xl font-bold text-white tracking-tight" style={{ textShadow: '0 0 80px rgba(255,255,255,0.3)' }}>
+                    {formatTime(time)}
+                  </h1>
+                  <p className="text-2xl text-white text-opacity-60 mt-4">
+                    {time.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                  </p>
+                </div>
+
+                <div className={`max-w-md mx-auto mb-16 transition-all duration-500 ${isDeepWorkActive ? 'scale-110' : 'scale-100'}`}>
+                  <div className="backdrop-blur-xl bg-white bg-opacity-10 rounded-3xl p-8 border border-white border-opacity-20 hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300">
+                    <h2 className="text-white text-opacity-80 text-sm uppercase tracking-widest mb-4 text-center">
+                      {isWorkMode ? 'Deep Work Timer' : 'Break Time'}
+                    </h2>
+                    <div className="text-7xl font-bold text-white text-center mb-6" style={{ textShadow: '0 0 40px rgba(255,255,255,0.5)' }}>
+                      {String(timerMinutes).padStart(2, '0')}:{String(timerSeconds).padStart(2, '0')}
+                    </div>
+                    <div className="flex justify-center gap-4">
+                      <button
+                        onClick={toggleTimer}
+                        className="backdrop-blur-xl bg-white bg-opacity-20 rounded-full p-4 hover:bg-opacity-30 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-white/50"
+                      >
+                        {isTimerRunning ? (
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        ) : (
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        )}
+                      </button>
+                      <button
+                        onClick={resetTimer}
+                        className="backdrop-blur-xl bg-white bg-opacity-20 rounded-full p-4 hover:bg-opacity-30 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-white/50"
+                      >
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`max-w-2xl mx-auto transition-all duration-500`}>
+                  <div className="backdrop-blur-xl bg-white bg-opacity-10 rounded-3xl p-8 border border-white border-opacity-20 hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300">
+                    <h2 className="text-2xl font-bold text-white mb-6 text-center">Today's Top 3 Intentions</h2>
+                    <div className="space-y-4">
+                      {goals.map((goal, index) => (
+                        <div key={goal.id} className="flex items-center gap-4 group">
+                          <input
+                            type="checkbox"
+                            checked={goal.completed}
+                            onChange={() => toggleGoal(goal.id)}
+                            className="w-6 h-6 rounded-lg cursor-pointer transition-transform hover:scale-110"
+                          />
+                          <input
+                            type="text"
+                            value={goal.text}
+                            onChange={(e) => updateGoal(goal.id, e.target.value)}
+                            placeholder={`Intention ${index + 1}`}
+                            className={`flex-1 bg-white bg-opacity-5 border border-white border-opacity-20 rounded-xl px-6 py-4 text-white placeholder-white placeholder-opacity-40 focus:outline-none focus:bg-opacity-10 focus:border-opacity-40 transition-all duration-300 ${
+                              goal.completed ? 'line-through opacity-50' : ''
+                            }`}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        ReactDOM.render(<FocusDashboard />, document.getElementById('root'));
+    </script>
+</body>
+</html>
