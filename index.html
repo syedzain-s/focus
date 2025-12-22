@@ -185,5 +185,40 @@
             }
         });
     </script>
-</body>
+<div id="ambient-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 9999; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 12px; border: 1px solid #8b5cf6; display: flex; align-items: center; gap: 10px;">
+    
+    <select id="soundSelect" style="background: transparent; color: white; border: none; font-size: 14px; outline: none; cursor: pointer;">
+        <option value="rain.mp3" style="color: black;">🌧️ Rain</option>
+        <option value="fire.mp3" style="color: black;">🔥 Fire</option>
+        <option value="piano.mp3" style="color: black;">🎹 Piano</option>
+    </select>
+
+    <button id="playPauseBtn" onclick="toggleAmbient()" style="background: #8b5cf6; border: none; color: white; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+        PLAY
+    </button>
+
+    <audio id="bgMusic" loop></audio>
+</div>
+
+<script>
+    function toggleAmbient() {
+        const audio = document.getElementById('bgMusic');
+        const btn = document.getElementById('playPauseBtn');
+        const selector = document.getElementById('soundSelect');
+
+        if (audio.paused) {
+            // Set the file source from the dropdown
+            audio.src = selector.value;
+            audio.play().catch(e => {
+                alert("Please make sure your mp3 files are named correctly in the folder!");
+            });
+            btn.innerText = "STOP";
+            btn.style.background = "#ef4444"; // Changes to red
+        } else {
+            audio.pause();
+            btn.innerText = "PLAY";
+            btn.style.background = "#8b5cf6"; // Back to purple
+        }
+    }
+</script></body>
 </html>
