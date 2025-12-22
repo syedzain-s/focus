@@ -1,362 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Focus Dashboard</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+<div id="ambient-controller" style="position: fixed; bottom: 30px; right: 30px; z-index: 9999; background: rgba(15, 23, 42, 0.9); border: 1px solid #8b5cf6; padding: 15px; border-radius: 16px; backdrop-filter: blur(10px); width: 220px; box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span style="color: #a78bfa; font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;">Atmosphere</span>
+        <div style="display: flex; gap: 2px;">
+            <div class="bar" style="width: 2px; height: 8px; background: #8b5cf6; animation: music-wave 1s infinite;"></div>
+            <div class="bar" style="width: 2px; height: 12px; background: #8b5cf6; animation: music-wave 1.2s infinite;"></div>
+            <div class="bar" style="width: 2px; height: 6px; background: #8b5cf6; animation: music-wave 0.8s infinite;"></div>
+        </div>
+    </div>
+
+    <select id="dashPicker" style="width: 100%; background: #000; color: white; border: 1px solid #333; padding: 8px; border-radius: 8px; font-size: 12px; margin-bottom: 10px; outline: none;">
+        <option value="rain.mp3">🌧️ Rain</option>
+        <option value="fire.mp3">🔥 Fire Crackle</option>
+        <option value="piano.mp3">🎹 Waterfall Piano</option>
+    </select>
+
+    <button id="playToggle" onclick="handleMusic()" style="width: 100%; background: linear-gradient(to right, #8b5cf6, #3b82f6); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px;">
+        PLAY SOUND
+    </button>
+
+    <audio id="ambientPlayer" loop></audio>
+</div>
+
+<style>
+    @keyframes music-wave {
+        0%, 100% { transform: scaleY(1); }
+        50% { transform: scaleY(1.5); }
+    }
+</style>
+
+<script>
+    function handleMusic() {
+        const audio = document.getElementById('ambientPlayer');
+        const picker = document.getElementById('dashPicker');
+        const btn = document.getElementById('playToggle');
+
+        if (audio.paused) {
+            audio.src = picker.value;
+            audio.play();
+            btn.innerText = "PAUSE";
+            btn.style.background = "#ef4444"; // Change to red when playing
+        } else {
+            audio.pause();
+            btn.innerText = "PLAY SOUND";
+            btn.style.background = "linear-gradient(to right, #8b5cf6, #3b82f6)";
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .float-animation { animation: float 3s ease-in-out infinite; }
-        .fade-in { animation: fadeIn 0.8s ease-out forwards; }
-        .grid-pattern {
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
-    </style>
-</head>
-<body style="margin: 0; padding: 0; overflow-y: auto;">
-    <div id="root"></div>
-    
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-
-        const motivationalQuotes = [
-            { text: "Focus is the gateway to thinking clearly.", author: "Naval Ravikant" },
-            { text: "The secret of change is to focus all of your energy on building the new.", author: "Socrates" },
-            { text: "Where focus goes, energy flows.", author: "Tony Robbins" },
-            { text: "It's not about having time, it's about making time.", author: "Unknown" },
-            { text: "The key is not to prioritize what's on your schedule, but to schedule your priorities.", author: "Stephen Covey" },
-            { text: "Deep work is like a superpower in our increasingly competitive economy.", author: "Cal Newport" },
-            { text: "You will never find time for anything. You must make it.", author: "Charles Buxton" },
-            { text: "The shorter way to do many things is to do only one thing at a time.", author: "Mozart" }
-        ];
-
-        function FocusDashboard() {
-          const currentUser = JSON.parse(localStorage.getItem('focusUser'));
-          if (!currentUser) {
-              window.location.href = 'index.html';
-          }
-
-          const [time, setTime] = useState(new Date());
-          const [goals, setGoals] = useState([
-            { id: 1, text: '', completed: false },
-            { id: 2, text: '', completed: false },
-            { id: 3, text: '', completed: false }
-          ]);
-          const [timerMinutes, setTimerMinutes] = useState(25);
-          const [timerSeconds, setTimerSeconds] = useState(0);
-          const [isTimerRunning, setIsTimerRunning] = useState(false);
-          const [isWorkMode, setIsWorkMode] = useState(true);
-          const [isDeepWorkActive, setIsDeepWorkActive] = useState(false);
-          const [quote, setQuote] = useState(motivationalQuotes[0]);
-          const [sessionsCompleted, setSessionsCompleted] = useState(0);
-
-          useEffect(() => {
-            const interval = setInterval(() => setTime(new Date()), 1000);
-            const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
-            setQuote(randomQuote);
-            return () => clearInterval(interval);
-          }, []);
-
-          useEffect(() => {
-            let interval;
-            if (isTimerRunning) {
-              interval = setInterval(() => {
-                if (timerSeconds === 0) {
-                  if (timerMinutes === 0) {
-                    setIsTimerRunning(false);
-                    setIsDeepWorkActive(false);
-                    if (isWorkMode) {
-                      setSessionsCompleted(prev => prev + 1);
-                    }
-                    setIsWorkMode(!isWorkMode);
-                    setTimerMinutes(isWorkMode ? 5 : 25);
-                  } else {
-                    setTimerMinutes(timerMinutes - 1);
-                    setTimerSeconds(59);
-                  }
-                } else {
-                  setTimerSeconds(timerSeconds - 1);
-                }
-              }, 1000);
-            }
-            return () => clearInterval(interval);
-          }, [isTimerRunning, timerMinutes, timerSeconds, isWorkMode]);
-
-          const toggleTimer = () => {
-            setIsTimerRunning(!isTimerRunning);
-            if (!isTimerRunning) setIsDeepWorkActive(true);
-          };
-
-          const resetTimer = () => {
-            setIsTimerRunning(false);
-            setIsDeepWorkActive(false);
-            setTimerMinutes(isWorkMode ? 25 : 5);
-            setTimerSeconds(0);
-          };
-
-          const toggleMode = () => {
-            setIsWorkMode(!isWorkMode);
-            setIsTimerRunning(false);
-            setIsDeepWorkActive(false);
-            setTimerMinutes(!isWorkMode ? 25 : 5);
-            setTimerSeconds(0);
-          };
-
-          const updateGoal = (id, text) => {
-            setGoals(goals.map(g => g.id === id ? { ...g, text } : g));
-          };
-
-          const toggleGoal = (id) => {
-            setGoals(goals.map(g => g.id === id ? { ...g, completed: !g.completed } : g));
-          };
-
-          const logout = () => {
-            localStorage.removeItem('focusUser');
-            window.location.href = 'index.html';
-          };
-
-          const formatTime = (date) => {
-            return date.toLocaleTimeString('en-US', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              second: '2-digit',
-              hour12: true 
-            });
-          };
-
-          const getGreeting = () => {
-            const hour = time.getHours();
-            if (hour < 12) return 'Good Morning';
-            if (hour < 18) return 'Good Afternoon';
-            return 'Good Evening';
-          };
-
-          const completedGoals = goals.filter(g => g.completed).length;
-
-          return (
-            <div className="min-h-screen bg-black relative" style={{ overflowY: 'auto' }}>
-              <div className="absolute inset-0 grid-pattern opacity-30"></div>
-              
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -left-40 w-96 h-96 bg-purple-600 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-pulse"></div>
-                <div className="absolute top-1/3 -right-20 w-96 h-96 bg-blue-600 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-pulse" style={{animationDelay: '1.5s'}}></div>
-                <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-pink-600 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-pulse" style={{animationDelay: '3s'}}></div>
-              </div>
-
-              {isDeepWorkActive && (
-                <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm z-40 transition-all duration-500 pointer-events-none"></div>
-              )}
-
-              <div className="relative z-20 min-h-screen p-6 pb-20 max-w-7xl mx-auto">
-                {/* Header */}
-                <div className="flex justify-between items-start mb-8 fade-in">
-                  <div>
-                    <h2 className="text-3xl font-bold text-white mb-1">{getGreeting()}, {currentUser.name}!</h2>
-                    <p className="text-gray-400 text-sm">{time.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={toggleMode}
-                      className="backdrop-blur-xl bg-zinc-900/50 border border-zinc-800 rounded-xl p-3 hover:bg-zinc-800/50 transition-all duration-300"
-                      title={isWorkMode ? 'Switch to Break Mode' : 'Switch to Work Mode'}
-                    >
-                      {isWorkMode ? (
-                        <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                        </svg>
-                      ) : (
-                        <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                      )}
-                    </button>
-
-                    <button
-                      onClick={logout}
-                      className="backdrop-blur-xl bg-zinc-900/50 border border-zinc-800 rounded-xl p-3 hover:bg-zinc-800/50 transition-all duration-300"
-                      title="Logout"
-                    >
-                      <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Stats Bar */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 fade-in" style={{animationDelay: '0.1s'}}>
-                  <div className="backdrop-blur-xl bg-gradient-to-br from-zinc-900/50 to-zinc-900/30 border border-zinc-800 rounded-xl p-5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                        <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-gray-400 text-xs uppercase tracking-wider">Sessions Today</p>
-                        <p className="text-2xl font-bold text-white">{sessionsCompleted}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="backdrop-blur-xl bg-gradient-to-br from-zinc-900/50 to-zinc-900/30 border border-zinc-800 rounded-xl p-5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                        <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-gray-400 text-xs uppercase tracking-wider">Goals Completed</p>
-                        <p className="text-2xl font-bold text-white">{completedGoals}/3</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="backdrop-blur-xl bg-gradient-to-br from-zinc-900/50 to-zinc-900/30 border border-zinc-800 rounded-xl p-5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-pink-500/20 rounded-lg flex items-center justify-center">
-                        <svg className="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-gray-400 text-xs uppercase tracking-wider">Focus Score</p>
-                        <p className="text-2xl font-bold text-white">{sessionsCompleted * 10 + completedGoals * 15}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Main Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Left Column */}
-                  <div className="lg:col-span-2 space-y-6">
-                    {/* Clock */}
-                    <div className={`backdrop-blur-xl bg-gradient-to-br from-zinc-900/70 to-zinc-900/50 border border-zinc-800 rounded-2xl p-8 fade-in transition-all duration-500 ${isDeepWorkActive ? 'opacity-40' : 'opacity-100'}`} style={{animationDelay: '0.2s'}}>
-                      <div className="text-center">
-                        <h1 className="text-8xl font-black text-white tracking-tighter mb-2" style={{textShadow: '0 0 40px rgba(139, 92, 246, 0.3)'}}>
-                          {formatTime(time)}
-                        </h1>
-                        <p className="text-gray-400 text-lg">{isWorkMode ? 'Work Mode' : 'Break Mode'}</p>
-                      </div>
-                    </div>
-
-                    {/* Timer */}
-                    <div className={`backdrop-blur-xl bg-gradient-to-br from-zinc-900/70 to-zinc-900/50 border border-zinc-800 rounded-2xl p-8 fade-in transition-all duration-500 ${isDeepWorkActive ? 'scale-105 ring-2 ring-purple-500/50' : 'scale-100'}`} style={{animationDelay: '0.3s'}}>
-                      <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-gray-400 text-sm uppercase tracking-widest font-semibold">
-                          {isWorkMode ? 'Deep Work Timer' : 'Break Time'}
-                        </h2>
-                        <div className={`px-3 py-1 rounded-full text-xs font-semibold ${isTimerRunning ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}`}>
-                          {isTimerRunning ? 'Active' : 'Paused'}
-                        </div>
-                      </div>
-                      
-                      <div className="text-center mb-8">
-                        <div className="text-7xl font-black text-white mb-8" style={{textShadow: '0 0 30px rgba(139, 92, 246, 0.5)'}}>
-                          {String(timerMinutes).padStart(2, '0')}:{String(timerSeconds).padStart(2, '0')}
-                        </div>
-                        
-                        <div className="flex justify-center gap-4">
-                          <button
-                            onClick={toggleTimer}
-                            className="backdrop-blur-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl px-8 py-3 font-semibold hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2"
-                          >
-                            {isTimerRunning ? (
-                              <>
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Pause
-                              </>
-                            ) : (
-                              <>
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Start
-                              </>
-                            )}
-                          </button>
-                          
-                          <button
-                            onClick={resetTimer}
-                            className="backdrop-blur-xl bg-zinc-800/50 border border-zinc-700 text-white rounded-xl px-6 py-3 font-semibold hover:bg-zinc-700/50 transition-all duration-300"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right Column */}
-                  <div className="space-y-6">
-                    {/* Quote */}
-                    <div className="backdrop-blur-xl bg-gradient-to-br from-zinc-900/70 to-zinc-900/50 border border-zinc-800 rounded-2xl p-6 fade-in float-animation" style={{animationDelay: '0.4s'}}>
-                      <div className="flex items-start gap-3 mb-4">
-                        <svg className="w-8 h-8 text-purple-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
-                        </svg>
-                        <div>
-                          <p className="text-white text-sm leading-relaxed mb-2">{quote.text}</p>
-                          <p className="text-gray-500 text-xs">— {quote.author}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Goals */}
-                    <div className="backdrop-blur-xl bg-gradient-to-br from-zinc-900/70 to-zinc-900/50 border border-zinc-800 rounded-2xl p-6 fade-in" style={{animationDelay: '0.5s'}}>
-                      <h2 className="text-white font-bold text-lg mb-4">Today's Intentions</h2>
-                      <div className="space-y-3">
-                        {goals.map((goal, index) => (
-                          <div key={goal.id} className="flex items-center gap-3 group">
-                            <input
-                              type="checkbox"
-                              checked={goal.completed}
-                              onChange={() => toggleGoal(goal.id)}
-                              className="w-5 h-5 rounded cursor-pointer transition-transform hover:scale-110 accent-purple-500"
-                            />
-                            <input
-                              type="text"
-                              value={goal.text}
-                              onChange={(e) => updateGoal(goal.id, e.target.value)}
-                              placeholder={`Goal ${index + 1}`}
-                              className={`flex-1 bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-purple-500 transition-all duration-300 ${
-                                goal.completed ? 'line-through opacity-50' : ''
-                              }`}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        }
-
-        ReactDOM.render(<FocusDashboard />, document.getElementById('root'));
-    </script>
-</body>
-</html>
+    }
+</script>
