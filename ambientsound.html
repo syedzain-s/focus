@@ -2,102 +2,110 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Focus Ambient Sounds</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Focus | Ambient Sounds</title>
     <style>
         body {
+            margin: 0;
+            padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1a1a2e; /* Dark professional background */
-            color: white;
+            background: #0f172a; /* Deep blue professional background */
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
+            color: white;
         }
-        .sound-card {
-            background: #16213e;
-            padding: 40px;
+        .audio-container {
+            background: #1e293b;
+            padding: 30px;
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             text-align: center;
-            width: 350px;
+            width: 320px;
+            border: 1px solid #334155;
         }
+        h2 { margin-bottom: 20px; color: #38bdf8; }
         select {
             width: 100%;
-            padding: 12px;
-            margin: 20px 0;
+            padding: 10px;
             border-radius: 8px;
-            border: none;
-            background: #0f3460;
+            background: #0f172a;
             color: white;
-            font-size: 16px;
-        }
-        .btn {
-            background: #e94560;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
+            border: 1px solid #38bdf8;
+            margin-bottom: 20px;
             cursor: pointer;
-            font-weight: bold;
+        }
+        .play-btn {
             width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #38bdf8;
+            color: #0f172a;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
             transition: 0.3s;
         }
-        .btn:hover { background: #ff5e78; }
-        .volume-label { display: block; margin-top: 20px; font-size: 12px; color: #999; }
+        .play-btn:hover { background: #7dd3fc; }
+        .vol-label { display: block; margin: 15px 0 5px; font-size: 12px; color: #94a3b8; }
     </style>
 </head>
 <body>
 
-<div class="sound-card">
-    <h2>Elite Focus Sounds</h2>
-    <p>Select your background atmosphere</p>
+    <div class="audio-container">
+        <h2>Focus Sounds</h2>
+        
+        <label for="soundPicker">Choose Atmosphere:</label>
+        <select id="soundPicker">
+            <option value="piano.mp3">🎹 Relaxing Piano</option>
+            <option value="rain.mp3">🌧️ Deep Rain</option>
+            <option value="wind.mp3">🌬️ Gentle Wind</option>
+        </select>
 
-    <select id="soundPicker">
-        <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">🎹 Lo-fi Piano</option>
-        <option value="https://actions.google.com/sounds/v1/water/rain_on_roof.ogg">🌧️ Soft Rain</option>
-        <option value="https://actions.google.com/sounds/v1/weather/wind_gentle_howl.ogg">🌬️ Calm Wind</option>
-    </select>
+        <audio id="bgAudio" loop>
+            <source id="audioSource" src="piano.mp3" type="audio/mpeg">
+        </audio>
 
-    <audio id="bgAudio" loop></audio>
+        <button class="play-btn" id="playBtn" onclick="togglePlay()">PLAY SOUND</button>
 
-    <button class="btn" id="playBtn" onclick="togglePlay()">Play Sound</button>
+        <span class="vol-label">Volume Control</span>
+        <input type="range" min="0" max="1" step="0.1" value="0.3" style="width: 100%;" oninput="changeVolume(this.value)">
+    </div>
 
-    <label class="volume-label">Adjust Volume</label>
-    <input type="range" min="0" max="1" step="0.1" value="0.3" style="width:100%" oninput="setVolume(this.value)">
-</div>
+    <script>
+        const audio = document.getElementById('bgAudio');
+        const source = document.getElementById('audioSource');
+        const picker = document.getElementById('soundPicker');
+        const btn = document.getElementById('playBtn');
 
-<script>
-    const audio = document.getElementById('bgAudio');
-    const picker = document.getElementById('soundPicker');
-    const btn = document.getElementById('playBtn');
-
-    // Load initial sound
-    audio.src = picker.value;
-    audio.volume = 0.3;
-
-    // Change sound when dropdown changes
-    picker.onchange = function() {
-        audio.src = this.value;
-        if (btn.innerText === "Pause Sound") {
-            audio.play();
-        }
-    };
-
-    function togglePlay() {
-        if (audio.paused) {
-            audio.play();
-            btn.innerText = "Pause Sound";
-        } else {
+        // Change the source when the dropdown changes
+        picker.onchange = function() {
             audio.pause();
-            btn.innerText = "Play Sound";
-        }
-    }
+            source.src = this.value;
+            audio.load();
+            if (btn.innerText === "PAUSE SOUND") {
+                audio.play();
+            }
+        };
 
-    function setVolume(val) {
-        audio.volume = val;
-    }
-</script>
+        function togglePlay() {
+            if (audio.paused) {
+                audio.play();
+                btn.innerText = "PAUSE SOUND";
+                btn.style.background = "#f87171"; // Change button to reddish when playing
+            } else {
+                audio.pause();
+                btn.innerText = "PLAY SOUND";
+                btn.style.background = "#38bdf8"; // Change back to blue
+            }
+        }
+
+        function changeVolume(val) {
+            audio.volume = val;
+        }
+    </script>
 
 </body>
 </html>
